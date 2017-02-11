@@ -14,6 +14,13 @@ PLAYER_URL = "http://videocollege.tue.nl/Mediasite/PlayerService/PlayerService.s
 FAKE_USERAGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/27.0.1453.93 Safari/537.36'
 HEADERS = {'User-Agent': FAKE_USERAGENT}
 
+
+# https://stackoverflow.com/questions/4836710/does-python-have-a-built-in-function-for-string-natural-sort
+def natural_sort_key(s, _nsre=re.compile('([0-9]+)')):
+    return [int(text) if text.isdigit() else text.lower()
+            for text in re.split(_nsre, s)]
+
+
 def init_session(user, pw):
     sess = requests.session()
 
@@ -37,7 +44,7 @@ def search(sess, term):
                "FacetFilters": [{"Key":"CatalogIds",
                                  "Value":"c2530f3a-2738-42c4-80d4-0365fcbf2163"}],
                "CurrentPage":0,
-               "ItemsPerPage":20,
+               "ItemsPerPage":100,
                "SortBy":"Date",
                "SortDirection":"Descending",
                "PreviewKey":"null",
@@ -93,7 +100,7 @@ if __name__ == "__main__":
 
     do_search = not bool(opts.regex_match)
 
-    for (name, id_) in lectures:
+    for (name, id_) in sorted(lectures, key=lambda x: natural_sort_key(x[0])):
         if do_search:
             print(name)
         elif re.match('.*' + opts.regex_match + '.*', name):
